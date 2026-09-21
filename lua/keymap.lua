@@ -103,9 +103,9 @@ G.map({
     { 'n', '<m-d>',       '"_diw',            { noremap = true } },
     { 'n', '<m-r>',       '"_ciw',            { noremap = true } },
 
-    -- windows: sp 上下窗口 sv 左右分屏 sc关闭当前 so关闭其他 s方向切换
-    { 'n', 'sv',          ':vsp<cr><c-w>w',   { noremap = true } },
-    { 'n', 'sp',          ':sp<cr><c-w>w',    { noremap = true } },
+    -- windows: sp 上下窗口 sv 左右分屏 sc关闭当前 so关闭其他 s方向切换 (splitright/splitbelow 已开, 新窗口自动在右/下)
+    { 'n', 'sv',          ':vsp<cr>',         { noremap = true } },
+    { 'n', 'sp',          ':sp<cr>',          { noremap = true } },
     { 'n', 'sc',          ':close<cr>',       { noremap = true } },
     { 'n', 'so',          ':only<cr>',        { noremap = true } },
     { 'n', 's<Left>',     '<c-w>h',           { noremap = true } },

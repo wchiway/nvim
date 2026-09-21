@@ -106,6 +106,8 @@
 
 自动高亮 `TODO` `NOTE` `FIXME` `HACK` 与 `#rrggbb` 颜色值。
 
+状态栏为全局单条（`laststatus=3`），左侧依次是模式、coc-git 分支与本文件改动、coc 诊断计数（E/W/I/H），右侧是文件信息与光标位置。coc 的 git / 诊断标记画在行号列上（`signcolumn=number`）。
+
 ### nvim-treesitter/nvim-treesitter -- 语法高亮
 
 固定在归档的 `v0.10.0`（对应 Neovim 0.10）。parser 列表在 `lua/pack/tree-sitter.lua` 的 `ensure_installed`，不会自动安装陌生语言。
@@ -116,7 +118,7 @@
 | --- | --- | --- |
 | terryma/vim-expand-region | 扩大 / 缩小选区 | visual `v` / `V` |
 | Mr-LLLLL/interestingwords.nvim | 高亮光标下的词 | `ff` 高亮 / `FF` 清除全部 |
-| ThorstenRhau/token | 配色方案 | |
+| ThorstenRhau/token | 配色方案, 自定义高亮统一写在 `lua/pack/token.lua` 的 `on_highlights` 里 | |
 
 命令行 `:` `/` `?` 边输入边弹出补全菜单为 Neovim 0.12 内置功能（`wildtrigger()`），`tab` 或上下键选择，菜单未弹出时上下键翻历史。
 

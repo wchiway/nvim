@@ -14,14 +14,13 @@ vim.opt.rtp:prepend(lazypath)
 local G = require('G')
 
 require("lazy").setup({
-    -- 配色方案
+    -- 配色方案 (自定义高亮见 pack/token.lua)
     {
         'ThorstenRhau/token',
         lazy = false,
         priority = 1000,
-        config = function()
-            vim.cmd.colorscheme('token')
-        end,
+        init = function() require('pack/token').config() end,
+        config = function() require('pack/token').setup() end
     },
 
     -- vv 快速选中内容插件 (延迟加载)

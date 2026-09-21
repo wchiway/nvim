@@ -6,8 +6,9 @@ G.api.nvim_create_autocmd({ "BufEnter" }, { command = [[if &buftype == '' && &re
 G.api.nvim_create_autocmd({ "BufReadPost" }, { command = [[if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif]] })
 G.api.nvim_create_autocmd({ "FileType" }, { command = "try | silent! loadview | catch | endtry" })
 G.api.nvim_create_autocmd({ "BufLeave", "BufWinLeave" }, { command = "silent! mkview" })
-G.api.nvim_create_autocmd({ "InsertEnter" }, { command = "hi CursorLine ctermbg=235 guibg=#262626" })
-G.api.nvim_create_autocmd({ "InsertLeave" }, { command = "hi CursorLine ctermbg=none guibg=none" })
+-- 仅插入模式高亮当前行 (颜色用 token 的 CursorLine)
+G.api.nvim_create_autocmd({ "InsertEnter" }, { command = "set cursorline" })
+G.api.nvim_create_autocmd({ "InsertLeave" }, { command = "set nocursorline" })
 -- 命令行 (: / ?) 边输入边弹出补全菜单 (替代 wilder.nvim)
 G.api.nvim_create_autocmd({ "CmdlineChanged" }, { pattern = { ":", "/", "?" }, command = "call wildtrigger()" })
 
@@ -112,12 +113,4 @@ function G_markdown_toggleCheck(needsave)
     else return end
     G.fn.setline('.', line)
     if needsave then G.cmd('w') end
-end
-
-function G_toggleBar(status)
-    G.cmd('set laststatus=' .. status)
-    G.cmd('set showtabline=' .. status)
-    if status == 0 then
-        G.o.winbar = ' '
-    end
 end

@@ -48,9 +48,14 @@ G.opt.scrolloff = 5
 G.opt.showmode = false
 G.opt.number = true
 G.opt.numberwidth = 2
-G.opt.cursorline = false  -- 禁用高亮当前行以提高性能
-G.opt.signcolumn = 'no'   -- 或者使用 'auto' 来动态调整
-G.opt.fillchars = 'fold:-,stlnc:#,eob: ,foldsep:='
+G.opt.cursorline = false  -- 默认关闭, 仅插入模式打开 (见 autocmd.lua)
+G.opt.signcolumn = 'number'  -- coc 的 git / 诊断标记画在行号列上, 不额外占一列
+G.opt.laststatus = 3      -- 全局状态栏 (mini.statusline)
+G.opt.splitright = true   -- 新分屏放右 / 下, 与 sv / sp 的习惯一致
+G.opt.splitbelow = true
+G.opt.list = true         -- 只显示尾随空格与 Tab
+G.opt.listchars = 'tab:▸ ,trail:·,nbsp:␣'
+G.opt.fillchars = 'fold:-,eob: ,foldsep:='
 G.opt.synmaxcol = 200     -- 限制语法高亮列数，提高大文件性能
 
 G.cmd([[

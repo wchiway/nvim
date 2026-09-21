@@ -31,8 +31,8 @@ graph LR
 |---|---|
 | `init.lua` | Entry point; loader/provider/builtin disabling and `require` order. |
 | `lua/` | All configuration Lua. `profile.lua` (options), `keymap.lua` (global maps), `autocmd.lua` (autocmds + filetype setup), `packinit.lua` (lazy.nvim spec), `G.lua` (shared helpers). |
-| `lua/pack/` | One module per plugin, 14 files, flat (no subdirectories). Loaded only via `require('pack/<name>')` from `lua/packinit.lua`. |
-| `colors/` | `markdown.css` (markdown-preview stylesheet) and `solarized8_high.vim` (legacy colorscheme; active scheme is `token`). |
+| `lua/pack/` | One module per plugin, 7 files, flat (no subdirectories). Loaded only via `require('pack/<name>')` from `lua/packinit.lua`. |
+| `colors/` | `solarized8_high.vim` only (legacy colorscheme; active scheme is `token`). |
 | `snippets/` | coc-snippets files. `*.snippets` + `.snippets` use **SnipMate** syntax; `snippets/ultisnips/all.snippets` uses **UltiSnips** syntax (`endsnippet` terminated). |
 | `plugin/` | Empty. Nothing auto-loads. |
 | `cache/` | Runtime `undodir`/`viewdir` (gitignored, recreated as needed). |
@@ -94,7 +94,9 @@ G.map({
 - `vim.keymap.set` appears in exactly one place (`lua/pack/nvim-tree.lua:62-75`, buffer-local with `desc`). Prefer `G.map` for consistency.
 - **No leader key is defined** anywhere (`mapleader`/`maplocalleader` are never set). Never write mappings that assume `<leader>`.
 
-**Global functions for `v:lua`** — functions intended to be called from vimscript are declared *without* `local` and prefixed `Magic*` or `G_*` (`MagicFoldText`, `MagicMove`, `MagicSave`, `MagicToggleHump`, `G_markdown_toggleCheck`, `G_toggleBar`). They are referenced as `'v:lua.MagicSave()'` inside mapping strings and option values. This applies in `lua/pack/nvim-lines.lua` too: `GitInfo`, `CocErrCount`, `GetFt` must stay global because `g:line_statusline_getters` calls them via `v:lua` (`lua/pack/nvim-lines.lua:26`).
+**Global functions for `v:lua`** — functions intended to be called from vimscript are declared *without* `local` and prefixed `Magic*` or `G_*` (`MagicFoldText`, `MagicMove`, `MagicSave`, `MagicToggleHump`, `G_markdown_toggleCheck`, `G_markdown_loadafter`, `G_vaddPairs`). They are referenced as `'v:lua.MagicSave()'` inside mapping strings and option values.
+
+**Custom highlights go through token, not `G.hi`.** The `token` colorscheme runs `hi clear` on load, wiping anything set earlier. `lua/pack/token.lua` calls `require('token').setup({ on_highlights = function(hl, p) ... end })` and defines every custom group there using palette fields (`p.red`, `p.bg4`, …). `G.hi` is still fine for buffer-local, filetype-scoped groups set after startup (e.g. the `MD*` groups in `lua/autocmd.lua`).
 
 **The `config()` / `setup()` contract is load-bearing, including empty bodies.** When a plugin has nothing to do in one phase, write an explicit no-op — do not delete the function, since `lua/packinit.lua` calls it unconditionally:
 
@@ -137,12 +139,12 @@ Then restart and `:Lazy sync`. Never hand-edit `lazy-lock.json`.
 | `lua/profile.lua` | All editor options, undodir/viewdir, `MagicFoldText()` used by `foldtext`. |
 | `lua/packinit.lua` | lazy.nvim bootstrap + the complete plugin spec (single source of truth for plugins and their lazy triggers). |
 | `lua/keymap.lua` | All global mappings plus `MagicMove`/`MagicSave`/`MagicToggleHump`. |
-| `lua/autocmd.lua` | Global autocmds, per-filetype setup table, `G_markdown_*` and `G_toggleBar` helpers. |
-| `lua/pack/nvim-tree.lua` | Largest plugin module; only user of `vim.keymap.set` and `desc`; extra export `M.magicCd()`. |
+| `lua/autocmd.lua` | Global autocmds, per-filetype setup table, `G_markdown_*` helpers. |
+| `lua/pack/token.lua` | Colorscheme setup; the single home for custom highlight groups (`on_highlights`). |
+| `lua/pack/mini.lua` | mini.nvim modules; custom statusline content that reads coc's diagnostic / git variables. |
 | `lua/pack/coc.lua` | coc.nvim globals + 22 `coc_global_extensions`; pairs with `coc-settings.json`. |
 | `coc-settings.json` | coc/nvim LSP + prettier settings, 4-space indent, strict JSON, no comments. Edited directly, never by Lua. |
-| `colors/markdown.css` | Stylesheet for markdown-preview.nvim. |
-| `README.md` | Chinese user docs: install, structure, keybinding tables. Documents plugins that no longer exist here (see Gotchas). |
+| `README.md` | Chinese user docs: install, structure, keybinding tables. |
 
 ## Runtime/Tooling Preferences
 

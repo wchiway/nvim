@@ -22,8 +22,7 @@ function M.config()
         '@yaegassy/coc-tailwindcss3',
     }
     G.cmd("command! -nargs=? Fold :call CocAction('fold', <f-args>)")
-    G.cmd("hi! link CocPum Pmenu")
-    G.cmd("hi! link CocMenuSel PmenuSel")
+    -- CocPum / CocMenuSel 默认即链接到 Pmenu / PmenuSel, 无需手动 link
     G.map({
         { 'n', '<F2>', '<Plug>(coc-rename)', {silent = true} },
         { 'n', 'gd', '<Plug>(coc-definition)', {silent = true} },
