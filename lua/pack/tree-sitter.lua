@@ -1,15 +1,6 @@
 local G = require('G')
 local M = {}
 
-function M.parser_bootstrap()
-    local parsers = require("nvim-treesitter.parsers")
-    local lang = parsers.ft_to_lang(G.api.nvim_eval('&ft'))
-    local has_parser = parsers.has_parser(lang)
-    if not has_parser then
-        G.cmd("try | call execute('TSInstall " .. lang .. "') | catch | endtry")
-    end
-end
-
 function M.config()
     G.hi({
         ["@identifier"] = { fg = "NONE" }, -- 32
@@ -73,34 +64,21 @@ function M.config()
         ["@markup.list"] = { fg = "#5fafd7" }, -- 32
     })
     G.map({
-        { 'n', 'H', ':TSHighlightCapturesUnderCursor<CR>', { silent = true, noremap = true } },
         { 'n', 'R', ':write | edit | TSBufEnable highlight<CR>', { silent = true, noremap = true } },
     })
-
-    -- some custom highlights
-    G.hi({
-        Todo = { fg = "#1c1c1c", bg = "#00afd7", bold = true }; -- 234/38
-        TodoText = { fg = "#00afd7", bg = 'NONE', bold = true }; -- 38
-        Note = { fg = "#1c1c1c", bg = "#5fd787", bold = true }; -- 234/78
-        NoteText = { fg = "#5fd787", bg = 'NONE', bold = true }; -- 78
-    })
-    G.cmd([[call matchadd('Todo', 'TODO:\{0,1\}')]])
-    G.cmd([[call matchadd('TodoText', 'TODO:\{0,1\}\zs.*')]])
-    G.cmd([[call matchadd('Note', 'NOTE:\{0,1\}')]])
-    G.cmd([[call matchadd('NoteText', 'NOTE:\{0,1\}\zs.*')]])
+    -- TODO/NOTE 高亮已交给 mini.hipatterns (见 pack/mini.lua)
 end
 
 function M.setup()
     require('nvim-treesitter.configs').setup({
-        -- 列举常用语言自动安装parser
-        ensure_installed = { 'typescript', 'javascript', 'vue', 'go', 'lua', 'markdown', 'markdown_inline' },
+        -- 固定 parser 列表; 仓库已归档, 不再对陌生文件类型自动 TSInstall
+        ensure_installed = { 'typescript', 'javascript', 'vue', 'go', 'python', 'lua', 'vim', 'vimdoc',
+            'bash', 'json', 'html', 'css', 'markdown', 'markdown_inline' },
         highlight = {
             enable = true,
             additional_vim_regex_highlighting = { "markdown" },
         },
     })
-    M.parser_bootstrap()
-    G.cmd([[ au FileType * lua require('pack/tree-sitter').parser_bootstrap() ]])
 end
 
 return M

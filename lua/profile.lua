@@ -1,25 +1,28 @@
 local G = require('G')
 
-G.g.python3_host_prog = os.getenv('PYTHON') -- export PYTHON=$(which python3)
 G.g.editorconfig = false
 G.opt.termguicolors = true
 G.opt.showcmd = true
 G.opt.encoding = 'utf-8'
 G.opt.wildmenu = true
+-- 命令行自动补全 (nvim 0.12): 弹出菜单, 不预选, 最近使用优先; 触发见 autocmd.lua 的 CmdlineChanged
+G.opt.wildmode = 'noselect:lastused,full'
+G.opt.wildoptions = 'pum,fuzzy'
 G.opt.pumheight = 10
 G.opt.conceallevel = 0
 G.opt.clipboard = 'unnamed,unnamedplus'
 G.opt.hlsearch = true
 G.opt.showmatch = true
 G.opt.incsearch = true
-G.opt.inccommand = ''
+G.opt.inccommand = 'split'  -- 改为 split 以便预览效果
 G.opt.ignorecase = true
 G.opt.smartcase = true
-G.opt.timeoutlen = 400
+G.opt.timeoutlen = 500  -- 增加超时时间，减少误判
+G.opt.ttimeoutlen = 10  -- 短超时，避免终端序列响应残留
 G.opt.backspace = 'indent,eol,start'
 G.opt.whichwrap = 'b,s,<,>,h,'
 G.opt.mouse = 'a'
-G.opt.vb = true
+G.opt.vb = false  -- 关闭视觉提示音，提升响应
 G.opt.hidden = true
 G.opt.autoindent = true
 G.opt.smartindent = true
@@ -32,28 +35,25 @@ G.opt.backup = false
 G.opt.swapfile = false
 G.opt.wrap = false
 G.opt.undofile = true
-G.opt.undodir = os.getenv('HOME') .. '/.config/nvim/cache/undodir'
-G.opt.viminfo = "!,'10000,<50,s10,h"
+G.opt.undodir = G.fn.stdpath('state') .. '/undo'
+G.opt.viminfo = "!,'1000,<50,s10,h"
 G.opt.foldenable = true
-G.opt.foldmethod = 'manual'
-G.opt.viewdir = os.getenv('HOME') .. '/.config/nvim/cache/viewdir'
+G.opt.foldmethod = 'manual'  -- 使用手动折叠而非语法折叠，减少CPU消耗
+G.opt.viewdir = G.fn.stdpath('state') .. '/view'
 G.opt.foldtext = 'v:lua.MagicFoldText()'
 G.opt.cmdheight = 1
-G.opt.updatetime = 300
-G.opt.shortmess = 'filnxtToOcIF'
+G.opt.updatetime = 1000  -- 提高更新时间间隔，减少UI刷新频率，但不要太高以免影响用户体验
+G.opt.shortmess = 'filnxtToOcIF'  -- 优化消息显示
 G.opt.scrolloff = 5
 G.opt.showmode = false
 G.opt.number = true
 G.opt.numberwidth = 2
-G.opt.cul = true
-G.opt.signcolumn = 'yes'
+G.opt.cursorline = false  -- 禁用高亮当前行以提高性能
+G.opt.signcolumn = 'no'   -- 或者使用 'auto' 来动态调整
 G.opt.fillchars = 'fold:-,stlnc:#,eob: ,foldsep:='
+G.opt.synmaxcol = 200     -- 限制语法高亮列数，提高大文件性能
 
 G.cmd([[
-    hi Normal ctermfg=7 guifg=#c0c0c0 ctermbg=NONE cterm=NONE
-    colorscheme solarized8_high
-    let &t_SI .= '\e[5 q'
-    let &t_EI .= '\e[1 q'
     let &t_vb = ''
     let &t_ut = ''
 ]])

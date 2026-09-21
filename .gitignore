@@ -9,3 +9,10 @@ log/
 **/dump.rdb
 **/.DS_Store
 plugin/packer_compiled.lua
+
+# WSL 元数据碎片
+*:Zone.Identifier*
+# 工具产物
+.serena/
+sumneko-lua-*/
+backups_*/

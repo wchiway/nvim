@@ -8,36 +8,39 @@ G.api.nvim_create_autocmd({ "FileType" }, { command = "try | silent! loadview | 
 G.api.nvim_create_autocmd({ "BufLeave", "BufWinLeave" }, { command = "silent! mkview" })
 G.api.nvim_create_autocmd({ "InsertEnter" }, { command = "hi CursorLine ctermbg=235 guibg=#262626" })
 G.api.nvim_create_autocmd({ "InsertLeave" }, { command = "hi CursorLine ctermbg=none guibg=none" })
+-- 命令行 (: / ?) 边输入边弹出补全菜单 (替代 wilder.nvim)
+G.api.nvim_create_autocmd({ "CmdlineChanged" }, { pattern = { ":", "/", "?" }, command = "call wildtrigger()" })
 
 -- 以下是for不同文件类型的相关配置
 
 local function _go()
-    G.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.go" }, command = "silent! call CocAction('runCommand', 'editor.action.organizeImport')" })
-    G.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.go" }, command = "call CocAction('format')" })
-    G.map({ { "v", "D", ":<c-u>call SurroundVaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } }, })
+    -- buffer = 0: 只作用于当前 buffer, 避免每打开一个 go 文件就多注册一份全局自动命令
+    G.api.nvim_create_autocmd({ "BufWritePre" }, { buffer = 0, command = "silent! call CocAction('runCommand', 'editor.action.organizeImport')" })
+    G.api.nvim_create_autocmd({ "BufWritePre" }, { buffer = 0, command = "call CocAction('format')" })
+    G.map({ { "v", "D", ":<c-u>call v:lua.G_vaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } }, })
 end
 
 local function _javascript()
     G.map({
-        { "v", "D", ":<c-u>call SurroundVaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } },
-        { "v", "T", ":<c-u>call SurroundVaddPairs(\"try {\", \"} catch (e) {}\")<cr>", { noremap = true, silent = true, buffer = true } },
+        { "v", "D", ":<c-u>call v:lua.G_vaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } },
+        { "v", "T", ":<c-u>call v:lua.G_vaddPairs(\"try {\", \"} catch (e) {}\")<cr>", { noremap = true, silent = true, buffer = true } },
     })
 end
 
 local function _typescript()
     G.map({
-        { "v", "D", ":<c-u>call SurroundVaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } },
-        { "v", "T", ":<c-u>call SurroundVaddPairs(\"try {\", \"} catch (e: any) {}\")<cr>", { noremap = true, silent = true, buffer = true } },
+        { "v", "D", ":<c-u>call v:lua.G_vaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } },
+        { "v", "T", ":<c-u>call v:lua.G_vaddPairs(\"try {\", \"} catch (e: any) {}\")<cr>", { noremap = true, silent = true, buffer = true } },
     })
 end
 
 local function _python()
-    G.map({ { "v", "D", ":<c-u>call SurroundVaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } }, })
+    G.map({ { "v", "D", ":<c-u>call v:lua.G_vaddPairs(\"/** \", \" */\")<cr>", { noremap = true, silent = true, buffer = true } }, })
 end
 
 local function _vue()
-    G.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.vue" }, command = "call CocAction('format')" })
-    G.map({ { "v", "D", ":<c-u>call SurroundVaddPairs(\"<!--\", \"--> \")<cr>", { noremap = true, silent = true, buffer = true } }, })
+    G.api.nvim_create_autocmd({ "BufWritePre" }, { buffer = 0, command = "call CocAction('format')" })
+    G.map({ { "v", "D", ":<c-u>call v:lua.G_vaddPairs(\"<!--\", \"--> \")<cr>", { noremap = true, silent = true, buffer = true } }, })
 end
 
 local function _markdown()
@@ -57,13 +60,11 @@ local function _markdown()
     G.map({
         { "n", "<cr>", ":call v:lua.G_markdown_toggleCheck(0)<cr><cr>", { noremap = true, silent = true, buffer = true } },
         { "n", "<2-LeftMouse>", ":call v:lua.G_markdown_toggleCheck(1)<cr><2-LeftMouse>", { noremap = true, silent = true, buffer = true } },
-        { "v", "B", ':<c-u>call SurroundVaddPairs("**", "**")<cr>', { noremap = true, silent = true, buffer = true } },
-        { "v", "I", ':<c-u>call SurroundVaddPairs("*", "*")<cr>', { noremap = true, silent = true, buffer = true } },
-        { "v", "T", ':<c-u>call SurroundVaddPairs("- [ ] ", "")<cr>', { noremap = true, silent = true, buffer = true } },
-        { "v", "`", ':<c-u>call SurroundVaddPairs("`", "``")<cr>', { noremap = true, silent = true, buffer = true } },
-        { "v", "C", ':<c-u>call SurroundVaddPairs("```plaintext", "```")<cr>', { noremap = true, silent = true, buffer = true } },
-        { "n", "<F6>", ':call v:lua.G_markdown_toggleMPTheme()<cr>', { noremap = true, silent = true, buffer = true } },
-        { "i", "<F6>", '<esc>:call v:lua.G_markdown_toggleMPTheme()<cr>', { noremap = true, silent = true, buffer = true } },
+        { "v", "B", ':<c-u>call v:lua.G_vaddPairs("**", "**")<cr>', { noremap = true, silent = true, buffer = true } },
+        { "v", "I", ':<c-u>call v:lua.G_vaddPairs("*", "*")<cr>', { noremap = true, silent = true, buffer = true } },
+        { "v", "T", ':<c-u>call v:lua.G_vaddPairs("- [ ] ", "")<cr>', { noremap = true, silent = true, buffer = true } },
+        { "v", "`", ':<c-u>call v:lua.G_vaddPairs("`", "``")<cr>', { noremap = true, silent = true, buffer = true } },
+        { "v", "C", ':<c-u>call v:lua.G_vaddPairs("```plaintext", "```")<cr>', { noremap = true, silent = true, buffer = true } },
     })
     G.cmd("call timer_start(0, 'v:lua.G_markdown_loadafter')") -- 延迟加载
 end
@@ -111,13 +112,6 @@ function G_markdown_toggleCheck(needsave)
     else return end
     G.fn.setline('.', line)
     if needsave then G.cmd('w') end
-end
-
-function G_markdown_toggleMPTheme()
-    G.g.mkdp_theme = G.g.mkdp_theme == 'dark' and 'light' or 'dark'
-    G.cmd('MarkdownPreviewStop')
-    G.cmd('sleep 500m')
-    G.cmd('MarkdownPreview')
 end
 
 function G_toggleBar(status)

@@ -16,7 +16,7 @@ function M.config()
         'coc-pyright',
         'coc-toml', '@nomicfoundation/coc-solidity',
         'coc-prettier',
-        'coc-snippets', 'coc-pairs', 'coc-word',
+        'coc-snippets', 'coc-word',
         'coc-translator',
         'coc-git',
         '@yaegassy/coc-tailwindcss3',
@@ -42,7 +42,8 @@ function M.config()
         { 'i', '<c-f>', "coc#pum#visible() ? '<c-y>' : '<c-f>'", {silent = true, expr = true} },
         { 'i', '<TAB>', "coc#pum#visible() ? coc#pum#next(1) : col('.') == 1 || getline('.')[col('.') - 2] =~# '\\s' ? \"\\<TAB>\" : coc#refresh()", {silent = true, noremap = true, expr = true} },
         { 'i', '<s-tab>', "coc#pum#visible() ? coc#pum#prev(1) : \"\\<s-tab>\"", {silent = true, noremap = true, expr = true} },
-        { 'i', '<cr>', "coc#pum#visible() ? coc#pum#confirm() : \"\\<c-g>u\\<cr>\\<c-r>=coc#on_enter()\\<cr>\"", {silent = true, noremap = true, expr = true} },
+        -- 回车: 补全菜单可见则确认, 否则交给 mini.pairs 处理括号内换行
+        { 'i', '<cr>', "coc#pum#visible() ? coc#pum#confirm() : \"\\<c-g>u\" . v:lua.MiniPairs.cr()", {silent = true, noremap = true, expr = true} },
         { 'i', '<c-y>', "coc#pum#visible() ? coc#pum#confirm() : '<c-y>'", {silent = true, noremap = true, expr = true} },
         { 'n', '<F3>', ":silent CocRestart<cr>", {silent = true, noremap = true} },
         { 'n', '<F4>', "get(g:, 'coc_enabled', 0) == 1 ? ':CocDisable<cr>' : ':CocEnable<cr>'", {silent = true, noremap = true, expr = true} },

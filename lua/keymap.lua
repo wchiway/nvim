@@ -21,8 +21,9 @@ G.map({
     -- cmap
     { 'c', '<c-a>',       '<home>',           { noremap = true } },
     { 'c', '<c-e>',       '<end>',            { noremap = true } },
-    { 'c', '<up>',        '<c-p>',            { noremap = true } },
-    { 'c', '<down>',      '<c-n>',            { noremap = true } },
+    -- 补全菜单可见时 上下键在菜单中移动, 否则翻历史
+    { 'c', '<up>',        'wildmenumode() ? "\\<c-p>" : "\\<up>"',   { noremap = true, expr = true } },
+    { 'c', '<down>',      'wildmenumode() ? "\\<c-n>" : "\\<down>"', { noremap = true, expr = true } },
 
     -- c-s = :%s/
     { 'n', '<c-s>',       ':<c-u>%s/\\v//gc<left><left><left><left>', { noremap = true } },
@@ -160,7 +161,8 @@ end
 
 -- 1 当目录不存在时 先创建目录, 2 当前文件是acwrite时, 用sudo保存
 function MagicSave()
-    if G.fn.empty(G.fn.glob(G.fn.expand('%:p:h'))) then G.fn.system('mkdir -p ' .. G.fn.expand('%:p:h')) end
+    local dir = G.fn.expand('%:p:h')
+    if G.fn.isdirectory(dir) == 0 then G.fn.mkdir(dir, 'p') end
     if G.o.buftype == 'acwrite' then
         G.fn.execute('w !sudo tee > /dev/null %')
     else

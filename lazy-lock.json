@@ -1,0 +1,9 @@
+{
+  "coc.nvim": { "branch": "release", "commit": "85709b90d7d3fa6962609b6adadac9f7b2067819" },
+  "interestingwords.nvim": { "branch": "master", "commit": "fa7796353266ce9a5de6a95a8e332814f09a5514" },
+  "lazy.nvim": { "branch": "main", "commit": "306a05526ada86a7b30af95c5cc81ffba93fef97" },
+  "mini.nvim": { "branch": "main", "commit": "1345d191bb3da9c7b0e977f4387c5761f9bff68d" },
+  "nvim-treesitter": { "branch": "main", "commit": "42fc28ba918343ebfd5565147a42a26580579482" },
+  "token": { "branch": "main", "commit": "1538e1eadcbc9eb465b33bab71eec48c8bed0b76" },
+  "vim-expand-region": { "branch": "master", "commit": "966513543de0ddc2d673b5528a056269e7917276" }
+}
