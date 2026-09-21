@@ -6,9 +6,9 @@ G.api.nvim_create_autocmd({ "BufEnter" }, { command = [[if &buftype == '' && &re
 G.api.nvim_create_autocmd({ "BufReadPost" }, { command = [[if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif]] })
 G.api.nvim_create_autocmd({ "FileType" }, { command = "try | silent! loadview | catch | endtry" })
 G.api.nvim_create_autocmd({ "BufLeave", "BufWinLeave" }, { command = "silent! mkview" })
--- 仅插入模式高亮当前行 (颜色用 token 的 CursorLine)
-G.api.nvim_create_autocmd({ "InsertEnter" }, { command = "set cursorline" })
-G.api.nvim_create_autocmd({ "InsertLeave" }, { command = "set nocursorline" })
+-- 正常模式只高亮行号, 插入模式高亮整行 (cursorline 常开, 见 profile.lua)
+G.api.nvim_create_autocmd({ "InsertEnter" }, { command = "set cursorlineopt=line,number" })
+G.api.nvim_create_autocmd({ "InsertLeave" }, { command = "set cursorlineopt=number" })
 -- 命令行 (: / ?) 边输入边弹出补全菜单 (替代 wilder.nvim)
 G.api.nvim_create_autocmd({ "CmdlineChanged" }, { pattern = { ":", "/", "?" }, command = "call wildtrigger()" })
 

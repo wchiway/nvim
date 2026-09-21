@@ -30,50 +30,93 @@ function M.config()
     -- MiniIndentscopeSymbol / MiniHipatterns* 等高亮在 pack/token.lua 里定义
 end
 
--- 状态栏: coc 诊断计数 (b:coc_diagnostic_info 由 coc 维护)
+-- 状态栏辅助: 给一段文字套高亮并回到基础组
+local function hl_wrap(group, text, base)
+    return string.format('%%#%s#%s%%#%s#', group, text, base)
+end
+
+-- 状态栏: coc 诊断计数 (b:coc_diagnostic_info 由 coc 维护), Nerd Font 图标
 local function coc_diagnostics()
     local info = G.b.coc_diagnostic_info
     if not info then return '' end
     local parts = {}
     for _, item in ipairs({
-        { 'error', 'E', 'MiniStatuslineError' },
-        { 'warning', 'W', 'MiniStatuslineWarn' },
-        { 'information', 'I', 'MiniStatuslineInfo' },
-        { 'hint', 'H', 'MiniStatuslineHint' },
+        { 'error',       '󰅚 ', 'MiniStatuslineError' },
+        { 'warning',     '󰀪 ', 'MiniStatuslineWarn' },
+        { 'information', '󰋽 ', 'MiniStatuslineInfo' },
+        { 'hint',        '󰌶 ', 'MiniStatuslineHint' },
     }) do
         local n = info[item[1]] or 0
         if n > 0 then
-            table.insert(parts, string.format('%%#%s#%s%d%%#MiniStatuslineDevinfo#', item[3], item[2], n))
+            table.insert(parts, hl_wrap(item[3], item[2] .. n, 'MiniStatuslineDevinfo'))
         end
     end
     return table.concat(parts, ' ')
 end
 
--- 状态栏: coc-git 分支与当前 buffer 改动 (g:coc_git_status / b:coc_git_status)
+-- 状态栏: coc-git 分支 (g:coc_git_status, 自带  前缀) 与当前 buffer 的 +N ~N -N 三色改动
 local function coc_git()
-    local branch = G.g.coc_git_status or ''
+    local branch = (G.g.coc_git_status or ''):gsub('%%', '%%%%')
+    local out = {}
+    if branch ~= '' then table.insert(out, hl_wrap('MiniStatuslineBranch', branch, 'MiniStatuslineDevinfo')) end
     local changes = G.b.coc_git_status or ''
-    return G.fn.trim(branch .. ' ' .. changes)
+    for sym, group in pairs({ ['+'] = 'MiniStatuslineAdded', ['~'] = 'MiniStatuslineChanged', ['-'] = 'MiniStatuslineRemoved' }) do
+        local n = changes:match('%' .. sym .. '(%d+)')
+        if n then table.insert(out, hl_wrap(group, sym .. n, 'MiniStatuslineDevinfo')) end
+    end
+    return table.concat(out, ' ')
+end
+
+-- 状态栏: 文件图标 + 相对路径 + 修改/只读标记
+local function file_section()
+    if G.o.buftype == 'terminal' then return '%t' end
+    local icon = ''
+    if _G.MiniIcons then
+        local glyph, group = _G.MiniIcons.get('file', G.api.nvim_buf_get_name(0))
+        icon = hl_wrap(group, glyph, 'MiniStatuslineFilename') .. ' '
+    end
+    local flags = ''
+    if G.o.modified then flags = flags .. hl_wrap('MiniStatuslineModified', ' ●', 'MiniStatuslineFilename') end
+    if G.o.readonly then flags = flags .. ' ' end
+    return icon .. '%f' .. flags
+end
+
+-- 状态栏: coc 服务状态 (语言服务名 / 进度), % 需转义
+local function coc_status()
+    local s = G.g.coc_status or ''
+    if s == '' then return '' end
+    return hl_wrap('MiniStatuslineLsp', (s:gsub('%%', '%%%%')), 'MiniStatuslineDevinfo')
+end
+
+-- 状态栏: 文件类型图标 + 名称
+local function filetype_section()
+    local ft = G.o.filetype
+    if ft == '' then return '' end
+    if _G.MiniIcons then
+        local glyph, group = _G.MiniIcons.get('filetype', ft)
+        return hl_wrap(group, glyph, 'MiniStatuslineFileinfo') .. ' ' .. ft
+    end
+    return ft
 end
 
 local function statusline_active()
     local MS = require('mini.statusline')
     local mode, mode_hl = MS.section_mode({ trunc_width = 120 })
-    local git           = coc_git()
-    local diagnostics   = coc_diagnostics()
-    local filename      = MS.section_filename({ trunc_width = 140 })
-    local fileinfo      = MS.section_fileinfo({ trunc_width = 120 })
-    local location      = MS.section_location({ trunc_width = 75 })
     local search        = MS.section_searchcount({ trunc_width = 75 })
     return MS.combine_groups({
-        { hl = mode_hl,                 strings = { mode } },
-        { hl = 'MiniStatuslineDevinfo', strings = { git, diagnostics } },
+        { hl = mode_hl,                  strings = { mode } },
+        { hl = 'MiniStatuslineDevinfo',  strings = { coc_git(), coc_diagnostics() } },
         '%<',
-        { hl = 'MiniStatuslineFilename', strings = { filename } },
+        { hl = 'MiniStatuslineFilename', strings = { file_section() } },
         '%=',
-        { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
-        { hl = mode_hl,                 strings = { search, location } },
+        { hl = 'MiniStatuslineDevinfo',  strings = { coc_status() } },
+        { hl = 'MiniStatuslineFileinfo', strings = { filetype_section() } },
+        { hl = mode_hl,                  strings = { search, '%l:%-2v', '%P' } },
     })
+end
+
+local function statusline_inactive()
+    return '%#MiniStatuslineInactive# %f%m%r %='
 end
 
 function M.setup()
@@ -109,15 +152,30 @@ function M.setup()
         },
     })
 
+    -- 图标提供者 (Nerd Font, 终端已用 Hack Nerd Font); statusline / tabline 自动取用
+    require('mini.icons').setup()
+
+    -- 光标下的词在别处淡色标出
+    require('mini.cursorword').setup({ delay = 150 })
+    G.cmd([[au FileType help,terminal,lazy let b:minicursorword_disable = v:true]])
+
     -- 状态栏: 诊断 / git 段改读 coc 的变量 (mini 默认读 vim.diagnostic / vim.lsp, coc 不往那里写)
     require('mini.statusline').setup({
-        use_icons = false,
-        content = { active = statusline_active },
+        use_icons = true,
+        content = { active = statusline_active, inactive = statusline_inactive },
     })
-    -- coc 更新诊断 / git 状态后立即刷新状态栏
+    -- coc 更新诊断 / git / 服务状态后立即刷新状态栏
     G.cmd([[au User CocDiagnosticChange,CocStatusChange,CocGitStatusChange redrawstatus]])
 
-    require('mini.tabline').setup({ show_icons = false })
+    -- 标签栏: 文件图标 + 名称, 修改过的加 ●
+    require('mini.tabline').setup({
+        show_icons = true,
+        format = function(buf_id, label)
+            local icon = _G.MiniIcons and (_G.MiniIcons.get('file', G.api.nvim_buf_get_name(buf_id))) or ''
+            local mark = G.api.nvim_get_option_value('modified', { buf = buf_id }) and ' ●' or ''
+            return string.format(' %s %s%s ', icon, label, mark)
+        end,
+    })
 end
 
 return M

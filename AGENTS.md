@@ -122,7 +122,7 @@ end
 
 Then restart and `:Lazy sync`. Never hand-edit `lazy-lock.json`.
 
-**Options** are set only in `lua/profile.lua` via `G.opt.*` / `G.g.*`. `lua/pack/**` contains zero option writes — keep it that way.
+**Options** are set only in `lua/profile.lua` via `G.opt.*` / `G.g.*`. `lua/pack/**` contains zero option writes — keep it that way. `lua/profile.lua` also enables the builtin `vim._core.ui2` (Neovim 0.12, experimental) with per-kind message routing; that is the one intentional `require('vim.*')` call outside `G`.
 
 **Error handling** — there is no `pcall`/`xpcall` anywhere in `lua/pack/`. Tolerance is expressed in vimscript (`try | … | catch | endtry` at `lua/pack/tree-sitter.lua:9`, `silent!` at `lua/pack/wilder.lua:40`).
 

@@ -41,22 +41,39 @@ G.opt.foldenable = true
 G.opt.foldmethod = 'manual'  -- 使用手动折叠而非语法折叠，减少CPU消耗
 G.opt.viewdir = G.fn.stdpath('state') .. '/view'
 G.opt.foldtext = 'v:lua.MagicFoldText()'
-G.opt.cmdheight = 1
+G.opt.cmdheight = 0       -- 平时不占命令行; 配合下方 ui2, 按 : 时才出现
 G.opt.updatetime = 1000  -- 提高更新时间间隔，减少UI刷新频率，但不要太高以免影响用户体验
 G.opt.shortmess = 'filnxtToOcIF'  -- 优化消息显示
 G.opt.scrolloff = 5
+G.opt.smoothscroll = true
 G.opt.showmode = false
 G.opt.number = true
 G.opt.numberwidth = 2
-G.opt.cursorline = false  -- 默认关闭, 仅插入模式打开 (见 autocmd.lua)
-G.opt.signcolumn = 'number'  -- coc 的 git / 诊断标记画在行号列上, 不额外占一列
+G.opt.cursorline = true
+G.opt.cursorlineopt = 'number'  -- 正常模式只高亮行号; 插入模式高亮整行 (见 autocmd.lua)
+G.opt.signcolumn = 'yes:1'      -- 固定 1 格, 放 coc 的 git / 诊断标记
+G.opt.statuscolumn = '%=%l %s'  -- 行号靠右, 标记条紧贴正文 (git 竖条 / 诊断图标)
 G.opt.laststatus = 3      -- 全局状态栏 (mini.statusline)
 G.opt.splitright = true   -- 新分屏放右 / 下, 与 sv / sp 的习惯一致
 G.opt.splitbelow = true
 G.opt.list = true         -- 只显示尾随空格与 Tab
 G.opt.listchars = 'tab:▸ ,trail:·,nbsp:␣'
-G.opt.fillchars = 'fold:-,eob: ,foldsep:='
+G.opt.fillchars = 'fold:-,eob: ,foldsep:=,msgsep:─'
 G.opt.synmaxcol = 200     -- 限制语法高亮列数，提高大文件性能
+
+-- nvim 0.12 内置 ui2: 命令行边输入边高亮, 长消息不再弹 Press ENTER 而是进分页器 (g< 回看).
+-- 路由: 普通消息在右下角小窗浮现 3 秒; 列表类输出 (:ls :messages :set ...) 直接进分页器;
+-- 错误 / 警告留在命令行区, 不被超时冲掉
+require('vim._core.ui2').enable({
+    msg = {
+        targets = {
+            list_cmd = 'pager', lua_print = 'pager', shell_out = 'pager', shell_err = 'pager', verbose = 'pager',
+            emsg = 'cmd', echoerr = 'cmd', lua_error = 'cmd', rpc_error = 'cmd', wmsg = 'cmd',
+            echo = 'msg', echomsg = 'msg', bufwrite = 'msg', undo = 'msg', quickfix = 'msg', progress = 'msg', completion = 'msg',
+        },
+        msg = { timeout = 3000 },
+    },
+})
 
 G.cmd([[
     let &t_vb = ''
